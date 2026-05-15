@@ -1,0 +1,4 @@
+botones.c:13:6:BOTONES_Init	4	static
+botones.c:18:6:HAL_GPIO_EXTI_Callback	16	static
+botones.c:27:8:BOTONES_GetJugador	4	static
+botones.c:32:6:BOTONES_Clear	4	static

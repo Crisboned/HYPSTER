@@ -1,0 +1,41 @@
+/*
+ * botones.c
+ *
+ *  Created on: 15 may. 2026
+ *      Author: Critina Gomez
+ */
+
+#include "botones.h"
+
+static volatile uint8_t pulsado = 0;
+static uint32_t last_tick = 0;
+
+void BOTONES_Init(void)
+{
+    // Nada: CubeMX configura PA0 como EXTI
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == GPIO_PIN_0)
+    {
+        uint32_t now = HAL_GetTick();
+
+        if (now - last_tick > 50)   // debounce 50 ms
+        {
+            pulsado = 1;
+            last_tick = now;
+        }
+    }
+}
+
+uint8_t BOTONES_HayPulsacion(void)
+{
+    return pulsado;
+}
+
+void BOTONES_Clear(void)
+{
+    pulsado = 0;
+}
+

@@ -1,0 +1,35 @@
+/*
+ * botones.c
+ *
+ *  Created on: 15 may. 2026
+ *      Author: Critina Gomez
+ */
+
+#include "botones.h"
+
+static volatile int8_t jugador_pulsado = -1;
+
+void BOTONES_Init(void)
+{
+    // Nada: CubeMX configura los EXTI
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    ISR = 1;
+	if (GPIO_Pin == GPIO_PIN_0) jugador_pulsado = 0;		//J1
+    else if (GPIO_Pin == GPIO_PIN_1) jugador_pulsado = 1;	//J2
+    else if (GPIO_Pin == GPIO_PIN_2) jugador_pulsado = 2;	//J3
+    else if (GPIO_Pin == GPIO_PIN_3) jugador_pulsado = 3;	//J4
+}
+
+int8_t BOTONES_GetJugador(void)
+{
+    return jugador_pulsado;
+}
+
+void BOTONES_Clear(void)
+{
+    jugador_pulsado = -1;
+}
+
