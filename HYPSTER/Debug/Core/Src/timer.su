@@ -1,0 +1,5 @@
+timer.c:22:6:TIMER_SetJugadorActivo	16	static
+timer.c:31:6:TIMER_Init	16	static
+timer.c:59:6:TIMER_Start	8	static
+timer.c:67:6:TIMER_Stop	8	static
+timer.c:72:6:TIMER_Tick	4	static

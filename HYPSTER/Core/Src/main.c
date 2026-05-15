@@ -26,6 +26,7 @@
 #include "leds.h"
 #include "botones.h"
 #include "control.h"
+#include "timer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +46,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+TIM_HandleTypeDef htim2;
+
 /* USER CODE BEGIN PV */
 volatile uint32_t contador = 0;
 volatile uint32_t espera = 0;
@@ -56,6 +59,7 @@ volatile uint16_t adc_val;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -84,6 +88,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   LEDS_Init();
   BOTONES_Init();
+  TIMER_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -96,6 +101,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   static uint8_t num_jugadores = 4;
   HAL_ADC_Start(&hadc1);
@@ -114,11 +120,8 @@ int main(void)
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  adc_val = HAL_ADC_GetValue(&hadc1);
 
-	/*  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
-	              uint16_t adc_val = (uint16_t)HAL_ADC_GetValue(&hadc1);
-	              Control_ActualizarDificultad(adc_val);
-	          }
-*/
+
+
 	  	  for (int i=0; i<5; i++) {
 	  		  HAL_NVIC_DisableIRQ(EXTI0_IRQn);
 	  		  HAL_NVIC_DisableIRQ(EXTI1_IRQn);
@@ -133,6 +136,8 @@ int main(void)
 
 	  		  uint8_t led_actual =LEDS_Random(num_jugadores);
 
+	  		  TIMER_SetJugadorActivo(led_actual);
+	  		  TIMER_Start();
 
 	  		  espera = 2000 + (rand() % 2001);   // 2000–4000 ms
 	  		  HAL_Delay(espera);
@@ -149,6 +154,8 @@ int main(void)
 	  		  while(jugador == -1){
 	  			  jugador = BOTONES_GetJugador();
 	  			  contador++;
+	  			TIMER_Stop();
+	  			uint32_t tiempo = timer_jugador[jugador];
 	  		  }
 
 	  		// Guardar medida
@@ -177,6 +184,7 @@ int main(void)
 
 	  		  contador = 0;
 	  		  ISR = 0;
+	  		timer_jugador[jugador] = 0;
 	  	  }
 
   }
@@ -274,6 +282,51 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 8399;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4294967295;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
