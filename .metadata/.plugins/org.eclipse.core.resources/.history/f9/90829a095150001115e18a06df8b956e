@@ -1,0 +1,38 @@
+/*
+ * leds.c
+ *
+ *  Created on: 15 may. 2026
+ *      Author: Critina Gomez
+ */
+
+#include "leds.h"
+#include <stdlib.h>
+
+static uint16_t leds_hw[4] = {
+    GPIO_PIN_12,
+    GPIO_PIN_13,
+    GPIO_PIN_14,
+    GPIO_PIN_15
+};
+
+void LEDS_Init(void)
+{
+    // Nada que hacer: CubeMX ya configuró los pines
+}
+
+void LEDS_AllOff(void)
+{
+    for (int i = 0; i < 4; i++)
+        HAL_GPIO_WritePin(GPIOD, leds_hw[i], GPIO_PIN_RESET);
+}
+
+void LEDS_On(uint8_t id)
+{
+    HAL_GPIO_WritePin(GPIOD, leds_hw[id], GPIO_PIN_SET);
+}
+
+uint8_t LEDS_Random(void)
+{
+    return rand() % 4;
+}
+
