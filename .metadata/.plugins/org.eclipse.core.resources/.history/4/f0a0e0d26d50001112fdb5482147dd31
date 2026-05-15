@@ -7,7 +7,7 @@
 
 #include "control.h"
 
-static uint8_t num_jugadores = 4; // por defecto
+static uint8_t num_jugadores = 2; // por defecto
 
 void CONTROL_SetNumJugadores(uint8_t n)
 {

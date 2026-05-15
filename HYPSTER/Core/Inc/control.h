@@ -8,6 +8,12 @@
 #ifndef INC_CONTROL_H_
 #define INC_CONTROL_H_
 
+#include <stdint.h>
 
+void CONTROL_SetNumJugadores(uint8_t n);
+uint8_t CONTROL_GetNumJugadores(void);
+
+uint8_t CONTROL_ElegirJugadorAleatorio(void);
+uint8_t CONTROL_EsPulsacionCorrecta(uint8_t jugador_led, int8_t jugador_pulsado);
 
 #endif /* INC_CONTROL_H_ */

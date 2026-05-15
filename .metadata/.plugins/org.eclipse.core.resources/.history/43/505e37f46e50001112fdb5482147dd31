@@ -93,7 +93,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  static uint8_t num_jugadores = 4;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

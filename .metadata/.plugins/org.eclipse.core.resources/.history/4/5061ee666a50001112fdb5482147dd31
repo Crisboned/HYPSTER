@@ -14,7 +14,7 @@
 void LEDS_Init(void);
 void LEDS_AllOff(void);
 void LEDS_On(uint8_t id);
-uint8_t LEDS_Random(uint8_t);
+uint8_t LEDS_Random(void);
 
 
 #endif /* INC_LEDS_H_ */

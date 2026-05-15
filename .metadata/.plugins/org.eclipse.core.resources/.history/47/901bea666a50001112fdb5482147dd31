@@ -32,8 +32,8 @@ void LEDS_On(uint8_t id)
     HAL_GPIO_WritePin(GPIOD, leds_hw[id], GPIO_PIN_SET);
 }
 
-uint8_t LEDS_Random(uint8_t n)
+uint8_t LEDS_Random(void)
 {
-    return rand() % n;
+    return rand() % 4;
 }
 

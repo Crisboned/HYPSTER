@@ -93,7 +93,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  static uint8_t num_jugadores = 4;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -115,7 +115,7 @@ int main(void)
 
 	  		  LEDS_AllOff();
 
-	  		  uint8_t led_actual =LEDS_Random(num_jugadores);
+	  		  uint8_t led_actual =LEDS_Random();
 
 
 	  		  espera = 2000 + (rand() % 2001);   // 2000–4000 ms
@@ -143,9 +143,6 @@ int main(void)
 	  		            {
 	  		                // Acierto
 	  		                // Aquí puedes poner animación, sonido, etc.
-	  		            	 LEDS_AllOff();
-	  		            	 LEDS_On(led_actual);
-	  		            	 HAL_Delay(200);
 	  		            }
 	  		            else
 	  		            {

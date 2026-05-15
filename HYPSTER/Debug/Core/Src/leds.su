@@ -1,4 +1,4 @@
 leds.c:19:6:LEDS_Init	4	static
 leds.c:24:6:LEDS_AllOff	16	static
 leds.c:30:6:LEDS_On	16	static
-leds.c:35:9:LEDS_Random	8	static
+leds.c:35:9:LEDS_Random	16	static
