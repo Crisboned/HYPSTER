@@ -1,0 +1,32 @@
+/*
+ * control.c
+ *
+ *  Created on: May 15, 2026
+ *      Author: Critina Gomez
+ */
+
+#include "control.h"
+
+static uint8_t num_jugadores = 4; // por defecto
+
+void CONTROL_SetNumJugadores(uint8_t n)
+{
+    if (n >= 1 && n <= 4)
+        num_jugadores = n;
+}
+
+uint8_t CONTROL_GetNumJugadores(void)
+{
+    return num_jugadores;
+}
+
+uint8_t CONTROL_ElegirJugadorAleatorio(void)
+{
+    return rand() % num_jugadores;
+}
+
+uint8_t CONTROL_EsPulsacionCorrecta(uint8_t jugador_led, int8_t jugador_pulsado)
+{
+    return jugador_led == jugador_pulsado;
+}
+

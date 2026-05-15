@@ -1,10 +1,10 @@
-17:02:01 **** Incremental Build of configuration Debug for project HYPSTER ****
+17:53:10 **** Incremental Build of configuration Debug for project HYPSTER ****
 make -j8 all 
 arm-none-eabi-size   HYPSTER.elf 
    text	   data	    bss	    dec	    hex	filename
-  13300	    136	   1680	  15116	   3b0c	HYPSTER.elf
+  15592	    136	   1760	  17488	   4450	HYPSTER.elf
 Finished building: default.size.stdout
  
 
-17:02:02 Build Finished. 0 errors, 0 warnings. (took 988ms)
+17:53:10 Build Finished. 0 errors, 0 warnings. (took 443ms)
 

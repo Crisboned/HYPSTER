@@ -2,3 +2,4 @@ control.c:12:6:CONTROL_SetNumJugadores	16	static
 control.c:18:9:CONTROL_GetNumJugadores	4	static
 control.c:23:9:CONTROL_ElegirJugadorAleatorio	8	static
 control.c:28:9:CONTROL_EsPulsacionCorrecta	16	static
+control.c:51:6:Control_ActualizarDificultad	24	static
