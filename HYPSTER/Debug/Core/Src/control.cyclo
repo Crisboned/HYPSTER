@@ -1,0 +1,7 @@
+../Core/Src/control.c:32:6:CONTROL_SetNumJugadores	3
+../Core/Src/control.c:38:9:CONTROL_GetNumJugadores	1
+../Core/Src/control.c:43:9:CONTROL_ElegirJugadorAleatorio	1
+../Core/Src/control.c:48:9:CONTROL_EsPulsacionCorrecta	1
+../Core/Src/control.c:53:6:CONTROL_ActualizarDificultad	8
+../Core/Src/control.c:89:14:CONTROL_GetDificultad	1
+../Core/Src/control.c:94:10:CONTROL_GetTiempoLimite	5

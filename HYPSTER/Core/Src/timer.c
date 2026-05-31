@@ -8,7 +8,8 @@
 #include "timer.h"
 
 
-TIM_HandleTypeDef htim2;
+//TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim2;
 
 // Contadores de tiempo por jugador
 volatile uint32_t timer_jugador[NUM_JUGADORES] = {0};

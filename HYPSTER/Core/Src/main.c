@@ -49,10 +49,11 @@ ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-volatile uint32_t contador = 0;
+//volatile uint32_t contador = 0;
 volatile uint32_t espera = 0;
 volatile uint8_t ISR = 0;
 volatile uint16_t adc_val;
+volatile uint32_t puntuacion[4] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,78 +115,156 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  uint8_t medida[4];
+	uint32_t medida[4];
 
-	  HAL_ADC_Start(&hadc1);
-	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	  adc_val = HAL_ADC_GetValue(&hadc1);
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	adc_val = HAL_ADC_GetValue(&hadc1);
 
+	CONTROL_ActualizarDificultad(adc_val);
 
+	for(int j = 0; j < num_jugadores; j++)
+	{
+	    puntuacion[j] = 0;
+	}
 
-	  	  for (int i=0; i<5; i++) {
-	  		  HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-	  		  HAL_NVIC_DisableIRQ(EXTI1_IRQn);
-	  		  HAL_NVIC_DisableIRQ(EXTI2_IRQn);
-	  		  HAL_NVIC_DisableIRQ(EXTI3_IRQn);
+	for (int i=0; i<4; i++) {
+		HAL_NVIC_DisableIRQ(EXTI0_IRQn);
+	  	HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+	  	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
+	  	HAL_NVIC_DisableIRQ(EXTI3_IRQn);
 
-	  		  BOTONES_Clear();
+	  	BOTONES_Clear();
 
-	  		  LEDS_AllOff();
+	  	LEDS_AllOff();
 
+	  	uint8_t led_actual =LEDS_Random(num_jugadores);
 
+	  	espera = 2000 + (rand() % 2001);   // 2000–4000 ms
+	  	HAL_Delay(espera);
 
-	  		  uint8_t led_actual =LEDS_Random(num_jugadores);
+	  	LEDS_On(led_actual);
 
-	  		  TIMER_SetJugadorActivo(led_actual);
-	  		  TIMER_Start();
+	  	timer_jugador[led_actual] = 0;
 
-	  		  espera = 2000 + (rand() % 2001);   // 2000–4000 ms
-	  		  HAL_Delay(espera);
+	  	TIMER_SetJugadorActivo(led_actual);
+	  	TIMER_Start();
 
-	  		  LEDS_On(led_actual);
+	  	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+	  	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+	  	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+	  	HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
+	  	int8_t jugador = -1;
+	  	uint8_t acierto = 0;
 
-	  		  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-	  		  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	  		  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-	  		  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+	  	uint32_t limite = CONTROL_GetTiempoLimite();
 
-	  		  int8_t jugador = -1;
-	  		  while(jugador == -1){
-	  			  jugador = BOTONES_GetJugador();
-	  			  contador++;
-	  			TIMER_Stop();
-	  			uint32_t tiempo = timer_jugador[jugador];
-	  		  }
+		while(acierto == 0)
+		{
+		    // Comprobar si se agotó el tiempo
+		    if(timer_jugador[led_actual] >= limite)
+		    {
+		        TIMER_Stop();
 
-	  		// Guardar medida
-	  		            medida[i] = contador;
+		        LEDS_AllOff();
 
-	  		            // Comprobar si acertó
-	  		            if (jugador == led_actual)
-	  		            {
-	  		                // Acierto
-	  		                // Aquí puedes poner animación, sonido, etc.
-	  		            	 LEDS_AllOff();
-	  		            	 LEDS_On(led_actual);
-	  		            	 HAL_Delay(200);
-	  		            }
-	  		            else
-	  		            {
-	  		                // Fallo
-	  		                // Parpadeo de error
-	  		                LEDS_AllOff();
-	  		                HAL_Delay(200);
-	  		                LEDS_On(led_actual);
-	  		                HAL_Delay(200);
-	  		            }
+		        // Señal de error por timeout
+		        for(int k = 0; k < 5; k++)
+		        {
+		            HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+		            HAL_Delay(100);
+		        }
 
-	  		  HAL_Delay(5000);
+		        medida[i] = limite;
 
-	  		  contador = 0;
-	  		  ISR = 0;
-	  		timer_jugador[jugador] = 0;
-	  	  }
+		        puntuacion[led_actual] += limite;
+
+		        acierto = 1;   // terminar ronda
+
+		        //continue;
+		    }
+
+		    // Leer botones
+			jugador = BOTONES_GetJugador();
+
+			if(jugador != -1)
+			{
+				// ¿Es el jugador correcto?
+				if(jugador == led_actual)
+				{
+					TIMER_Stop();
+
+					uint32_t tiempo = timer_jugador[led_actual];
+
+					medida[i] = tiempo;
+
+					puntuacion[jugador] += tiempo;
+
+					acierto = 1;
+				}
+				else
+				{
+					// ERROR → pulsó otro jugador
+					TIMER_Stop();
+					LEDS_AllOff();
+
+					// Parpadeo rápido error
+					for(int k=0; k<3; k++)
+					{
+						HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+						HAL_Delay(100);
+					}
+
+					medida[i] = limite;
+					puntuacion[led_actual] += limite;
+					acierto = 1;
+
+					//BOTONES_Clear();
+
+				}
+			}
+		}
+	  	// Guardar medida
+	  	//medida[i] = contador;
+
+	  	// Comprobar si acertó
+	  	/*if (jugador == led_actual)
+	  	{
+	  		// Acierto
+	  		// Aquí puedes poner animación, sonido, etc.
+	  		LEDS_AllOff();
+	  		LEDS_On(led_actual);
+	  		HAL_Delay(200);
+	  	}
+	  	else
+	  	{
+	  		// Fallo
+	  		// Parpadeo de error
+	  		LEDS_AllOff();
+	  		HAL_Delay(200);
+	  		LEDS_On(led_actual);
+	  		HAL_Delay(200);
+	  	}*/
+
+	  	HAL_Delay(5000);
+
+	  	LEDS_AllOff();
+
+	  	//contador = 0;
+	  	ISR = 0;
+	  	timer_jugador[led_actual] = 0;
+	}
+
+	uint8_t ganador = 0;
+
+	for(int i = 1; i < num_jugadores; i++)
+	{
+	    if(puntuacion[i] < puntuacion[ganador])
+	    {
+	        ganador = i;
+	    }
+	}
 
   }
   /* USER CODE END 3 */
@@ -392,8 +471,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM1) {
-    HAL_IncTick();
+  if (htim->Instance == TIM2) {
+    TIMER_Tick();
   }
   /* USER CODE BEGIN Callback 1 */
 

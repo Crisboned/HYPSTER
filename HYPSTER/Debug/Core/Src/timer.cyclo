@@ -1,0 +1,5 @@
+../Core/Src/timer.c:23:6:TIMER_SetJugadorActivo	2
+../Core/Src/timer.c:32:6:TIMER_Init	1
+../Core/Src/timer.c:60:6:TIMER_Start	1
+../Core/Src/timer.c:68:6:TIMER_Stop	1
+../Core/Src/timer.c:73:6:TIMER_Tick	1

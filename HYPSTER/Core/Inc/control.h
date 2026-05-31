@@ -18,7 +18,7 @@ typedef enum {
     DIFICULTAD_DIFICIL
 } Dificultad_t;
 
-void Control_ActualizarDificultad(uint16_t adc_val);
+void CONTROL_ActualizarDificultad(uint16_t adc_val);
 
 
 void CONTROL_SetNumJugadores(uint8_t n);
@@ -27,6 +27,7 @@ uint8_t CONTROL_GetNumJugadores(void);
 uint8_t CONTROL_ElegirJugadorAleatorio(void);
 uint8_t CONTROL_EsPulsacionCorrecta(uint8_t jugador_led, int8_t jugador_pulsado);
 
-
+Dificultad_t CONTROL_GetDificultad(void);
+uint32_t CONTROL_GetTiempoLimite(void);
 
 #endif /* INC_CONTROL_H_ */

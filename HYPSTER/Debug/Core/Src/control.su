@@ -1,5 +1,7 @@
-control.c:12:6:CONTROL_SetNumJugadores	16	static
-control.c:18:9:CONTROL_GetNumJugadores	4	static
-control.c:23:9:CONTROL_ElegirJugadorAleatorio	8	static
-control.c:28:9:CONTROL_EsPulsacionCorrecta	16	static
-control.c:51:6:Control_ActualizarDificultad	24	static
+../Core/Src/control.c:32:6:CONTROL_SetNumJugadores	16	static
+../Core/Src/control.c:38:9:CONTROL_GetNumJugadores	4	static
+../Core/Src/control.c:43:9:CONTROL_ElegirJugadorAleatorio	8	static
+../Core/Src/control.c:48:9:CONTROL_EsPulsacionCorrecta	16	static
+../Core/Src/control.c:53:6:CONTROL_ActualizarDificultad	24	static
+../Core/Src/control.c:89:14:CONTROL_GetDificultad	4	static
+../Core/Src/control.c:94:10:CONTROL_GetTiempoLimite	4	static
