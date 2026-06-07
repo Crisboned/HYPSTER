@@ -1,0 +1,5 @@
+../Core/Src/control.c:13:6:CONTROL_SetNumJugadores	3
+../Core/Src/control.c:19:9:CONTROL_GetNumJugadores	1
+../Core/Src/control.c:24:9:CONTROL_ElegirJugadorAleatorio	1
+../Core/Src/control.c:29:9:CONTROL_EsPulsacionCorrecta	1
+../Core/Src/control.c:52:6:Control_ActualizarDificultad	8

@@ -6,6 +6,7 @@
  */
 
 #include "control.h"
+#include <stdlib.h>
 
 static uint8_t num_jugadores = 4; // por defecto
 

@@ -1,0 +1,4 @@
+../Core/Src/leds.c:19:6:LEDS_Init	1
+../Core/Src/leds.c:24:6:LEDS_AllOff	2
+../Core/Src/leds.c:30:6:LEDS_On	1
+../Core/Src/leds.c:35:9:LEDS_Random	1

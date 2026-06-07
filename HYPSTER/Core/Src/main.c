@@ -26,6 +26,7 @@
 #include "leds.h"
 #include "botones.h"
 #include "control.h"
+#include "timer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,17 +46,22 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+TIM_HandleTypeDef htim2;
+
 /* USER CODE BEGIN PV */
 volatile uint32_t contador = 0;
 volatile uint32_t espera = 0;
 volatile uint8_t ISR = 0;
 volatile uint16_t adc_val;
+extern volatile uint32_t tiempo_reaccion;
+volatile uint32_t medida[4];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,9 +102,13 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   static uint8_t num_jugadores = 4;
   HAL_ADC_Start(&hadc1);
+  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+  uint16_t aleatorio = HAL_ADC_GetValue(&hadc1);
+  srand(aleatorio);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -108,11 +118,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  uint8_t medida[4];
 
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  adc_val = HAL_ADC_GetValue(&hadc1);
+
 
 	/*  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
 	              uint16_t adc_val = (uint16_t)HAL_ADC_GetValue(&hadc1);
@@ -139,6 +149,8 @@ int main(void)
 
 	  		  LEDS_On(led_actual);
 
+	  		  TIMER_Reset();
+	  		  TIMER_Start();
 
 	  		  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 	  		  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
@@ -149,10 +161,20 @@ int main(void)
 	  		  while(jugador == -1){
 	  			  jugador = BOTONES_GetJugador();
 	  			  contador++;
+	  			  if (jugador == led_actual)
+	  			    {
+	  			       TIMER_Stop();
+	  				  break;  // respuesta correcta
+	  			    }
+
+	  			   if (jugador != -1)
+	  			    {
+	  			        BOTONES_Clear(); // ignorar jugador incorrecto
+	  			    }
 	  		  }
 
 	  		// Guardar medida
-	  		            medida[i] = contador;
+	  		            medida[i] = tiempo_reaccion;
 
 	  		            // Comprobar si acertó
 	  		            if (jugador == led_actual)
@@ -161,16 +183,24 @@ int main(void)
 	  		                // Aquí puedes poner animación, sonido, etc.
 	  		            	 LEDS_AllOff();
 	  		            	 LEDS_On(led_actual);
-	  		            	 HAL_Delay(200);
+	  		            	 HAL_Delay(2000);
 	  		            }
 	  		            else
 	  		            {
 	  		                // Fallo
 	  		                // Parpadeo de error
-	  		                LEDS_AllOff();
+	  		                /*LEDS_AllOff();
 	  		                HAL_Delay(200);
 	  		                LEDS_On(led_actual);
-	  		                HAL_Delay(200);
+	  		                HAL_Delay(200);*/
+	  		            	for(int k=0; k<5; k++)
+	  		            	    {
+	  		            	        LEDS_AllOff();
+	  		            	        HAL_Delay(100);
+
+	  		            	        LEDS_On(led_actual);
+	  		            	        HAL_Delay(100);
+	  		            	    }
 	  		            }
 
 	  		  HAL_Delay(5000);
@@ -196,6 +226,7 @@ void SystemClock_Config(void)
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -212,6 +243,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -244,6 +276,7 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 1 */
 
   /* USER CODE END ADC1_Init 1 */
+
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc1.Instance = ADC1;
@@ -262,6 +295,7 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
+
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_1;
@@ -278,6 +312,51 @@ static void MX_ADC1_Init(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 8399;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 9;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -285,6 +364,8 @@ static void MX_ADC1_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -320,6 +401,8 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -343,7 +426,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM2)
+  {
+      tiempo_reaccion++;
+  }
   /* USER CODE END Callback 1 */
 }
 
@@ -378,5 +464,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
