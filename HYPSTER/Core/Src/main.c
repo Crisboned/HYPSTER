@@ -55,8 +55,10 @@ volatile uint8_t ISR = 0;
 volatile uint16_t adc_val;
 extern volatile uint32_t tiempo_reaccion;
 volatile uint32_t tiempo_max = 3000;
-volatile uint32_t medida[4];
+//volatile uint32_t medida[4];
 uint8_t activaciones[4] = {0}; //asegurar que todos los jugadores reciben 5 encendidos en total
+uint32_t puntuacion[4] = {0};
+uint8_t ganador = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,6 +127,11 @@ int main(void)
   for(int j=0; j<4; j++)
   {
       activaciones[j] = 0;
+  }
+
+  for(int i=0; i<4; i++)
+  {
+      puntuacion[i] = 0;
   }
   /* USER CODE END 2 */
 
@@ -229,6 +236,7 @@ int main(void)
 	  		            if (jugador == led_actual)
 	  		            {
 	  		                // Acierto
+	  		            	puntuacion[jugador] += tiempo_reaccion;	//sumar al jugador correcto su puntuación
 	  		                // Led fijo 2 segundos
 	  		            	 LEDS_AllOff();
 	  		            	 LEDS_On(led_actual);
@@ -237,6 +245,7 @@ int main(void)
 	  		            else if(jugador == -2)
 	  		            {
 	  		            	// Tiempo agotado
+	  		            	puntuacion[led_actual] += tiempo_max; //sumar al jugador que no ha pulsado el tiempo max
 	  		            	// Parpadeo de error: 10 parpadeos
 	  		            	for(int k=0; k<10; k++)
 	  		            	    {
@@ -250,6 +259,7 @@ int main(void)
 	  		            else
 	  		            {
 	  		                // Fallo jugador incorrecto
+	  		            	puntuacion[jugador] += tiempo_max; //sumar al jugador incorrecto el tiempo max (penalización por pulsar cuando no debes)
 	  		                // Parpadeo de error: 5 parpadeos
 	  		            	for(int k=0; k<5; k++)
 	  		            	    {
@@ -266,6 +276,16 @@ int main(void)
 	  		  contador = 0;
 	  		  ISR = 0;
 	  	  }
+
+	  //uint8_t ganador = 0;
+
+	  for(int i=1; i<num_jugadores; i++)
+	  {
+	      if(puntuacion[i] < puntuacion[ganador])
+	      {
+	          ganador = i;
+	      }
+	  }
 
   }
   /* USER CODE END 3 */
