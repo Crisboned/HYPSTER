@@ -84,3 +84,8 @@ void Control_ActualizarDificultad(uint16_t adc_val)
         }
     }
 }
+
+Dificultad_t Control_GetDificultad(void)
+{
+    return dificultad_actual;
+}

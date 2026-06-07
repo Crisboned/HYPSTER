@@ -3,3 +3,4 @@
 ../Core/Src/control.c:24:9:CONTROL_ElegirJugadorAleatorio	8	static
 ../Core/Src/control.c:29:9:CONTROL_EsPulsacionCorrecta	16	static
 ../Core/Src/control.c:52:6:Control_ActualizarDificultad	24	static
+../Core/Src/control.c:88:14:Control_GetDificultad	4	static

@@ -19,7 +19,7 @@ typedef enum {
 } Dificultad_t;
 
 void Control_ActualizarDificultad(uint16_t adc_val);
-
+Dificultad_t Control_GetDificultad(void);
 
 void CONTROL_SetNumJugadores(uint8_t n);
 uint8_t CONTROL_GetNumJugadores(void);

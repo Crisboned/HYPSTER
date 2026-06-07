@@ -54,6 +54,7 @@ volatile uint32_t espera = 0;
 volatile uint8_t ISR = 0;
 volatile uint16_t adc_val;
 extern volatile uint32_t tiempo_reaccion;
+volatile uint32_t tiempo_max = 3000;
 volatile uint32_t medida[4];
 /* USER CODE END PV */
 
@@ -123,6 +124,22 @@ int main(void)
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  adc_val = HAL_ADC_GetValue(&hadc1);
 
+	  Control_ActualizarDificultad(adc_val);
+
+	  switch(Control_GetDificultad())
+	  {
+	      case DIFICULTAD_FACIL:
+	          tiempo_max = 3000;
+	          break;
+
+	      case DIFICULTAD_MEDIA:
+	          tiempo_max = 2000;
+	          break;
+
+	      case DIFICULTAD_DIFICIL:
+	          tiempo_max = 1000;
+	          break;
+	  }
 
 	/*  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
 	              uint16_t adc_val = (uint16_t)HAL_ADC_GetValue(&hadc1);
@@ -161,15 +178,24 @@ int main(void)
 	  		  while(jugador == -1){
 	  			  jugador = BOTONES_GetJugador();
 	  			  contador++;
+	  			  if(tiempo_reaccion >= tiempo_max)
+	  			    {
+	  			        TIMER_Stop();
+
+	  			        jugador = -2;   // timeout
+
+	  			        break;
+	  			    }
 	  			  if (jugador == led_actual)
 	  			    {
-	  			       TIMER_Stop();
+	  			      TIMER_Stop();
 	  				  break;  // respuesta correcta
 	  			    }
 
 	  			   if (jugador != -1)
 	  			    {
-	  			        BOTONES_Clear(); // ignorar jugador incorrecto
+	  				  TIMER_Stop();
+	  				  break;  // botón incorrecto (pulsa otro jugador)
 	  			    }
 	  		  }
 
@@ -180,19 +206,28 @@ int main(void)
 	  		            if (jugador == led_actual)
 	  		            {
 	  		                // Acierto
-	  		                // Aquí puedes poner animación, sonido, etc.
+	  		                // Led fijo 2 segundos
 	  		            	 LEDS_AllOff();
 	  		            	 LEDS_On(led_actual);
 	  		            	 HAL_Delay(2000);
 	  		            }
+	  		            else if(jugador == -2)
+	  		            {
+	  		            	// Tiempo agotado
+	  		            	// Parpadeo de error: 10 parpadeos
+	  		            	for(int k=0; k<10; k++)
+	  		            	    {
+	  		            	        LEDS_AllOff();
+	  		            	        HAL_Delay(100);
+
+	  		            	        LEDS_On(led_actual);
+	  		            	        HAL_Delay(100);
+	  		            	    }
+	  		            }
 	  		            else
 	  		            {
-	  		                // Fallo
-	  		                // Parpadeo de error
-	  		                /*LEDS_AllOff();
-	  		                HAL_Delay(200);
-	  		                LEDS_On(led_actual);
-	  		                HAL_Delay(200);*/
+	  		                // Fallo jugador incorrecto
+	  		                // Parpadeo de error: 5 parpadeos
 	  		            	for(int k=0; k<5; k++)
 	  		            	    {
 	  		            	        LEDS_AllOff();
