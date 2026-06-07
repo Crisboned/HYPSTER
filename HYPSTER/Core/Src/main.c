@@ -56,6 +56,7 @@ volatile uint16_t adc_val;
 extern volatile uint32_t tiempo_reaccion;
 volatile uint32_t tiempo_max = 3000;
 volatile uint32_t medida[4];
+uint8_t activaciones[4] = {0}; //asegurar que todos los jugadores reciben 5 encendidos en total
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,7 +70,16 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t RondaTerminada(void)
+{
+    for(int i=0; i<4; i++)
+    {
+        if(activaciones[i] < 5)
+            return 0;
+    }
 
+    return 1;
+}
 
 /* USER CODE END 0 */
 
@@ -106,10 +116,16 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   static uint8_t num_jugadores = 4;
+
   HAL_ADC_Start(&hadc1);
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
   uint16_t aleatorio = HAL_ADC_GetValue(&hadc1);
   srand(aleatorio);
+
+  for(int j=0; j<4; j++)
+  {
+      activaciones[j] = 0;
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -146,7 +162,7 @@ int main(void)
 	              Control_ActualizarDificultad(adc_val);
 	          }
 */
-	  	  for (int i=0; i<5; i++) {
+	  while(!RondaTerminada()) {
 	  		  HAL_NVIC_DisableIRQ(EXTI0_IRQn);
 	  		  HAL_NVIC_DisableIRQ(EXTI1_IRQn);
 	  		  HAL_NVIC_DisableIRQ(EXTI2_IRQn);
@@ -157,9 +173,16 @@ int main(void)
 	  		  LEDS_AllOff();
 
 
+	  		  //uint8_t led_actual =LEDS_Random(num_jugadores);
+	  		uint8_t led_actual;
 
-	  		  uint8_t led_actual =LEDS_Random(num_jugadores);
+	  		do
+	  		{
+	  		    led_actual = LEDS_Random(num_jugadores);
 
+	  		} while(activaciones[led_actual] >= 5);
+
+	  		activaciones[led_actual]++;
 
 	  		  espera = 2000 + (rand() % 2001);   // 2000–4000 ms
 	  		  HAL_Delay(espera);
@@ -200,7 +223,7 @@ int main(void)
 	  		  }
 
 	  		// Guardar medida
-	  		            medida[i] = tiempo_reaccion;
+	  		            //medida[i] = tiempo_reaccion;
 
 	  		            // Comprobar si acertó
 	  		            if (jugador == led_actual)
