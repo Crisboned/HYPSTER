@@ -27,6 +27,7 @@
 #include "botones.h"
 #include "control.h"
 #include "timer.h"
+#include "lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -103,6 +104,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   LEDS_Init();
   BOTONES_Init();
+  //LCD_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -127,12 +129,23 @@ int main(void)
   for(int j=0; j<4; j++)
   {
       activaciones[j] = 0;
+      puntuacion[j] = 0;
   }
 
-  for(int i=0; i<4; i++)
+  /*for(int i=0; i<4; i++)
   {
       puntuacion[i] = 0;
-  }
+  }*/
+
+  LCD_Init();
+  LCD_Clear();
+
+  /*LCD_SetCursor(0,0);
+  LCD_Print("AAAAAAAAAAAAAA");
+
+  LCD_SetCursor(1,0);
+  LCD_Print("STM32F411");*/
+  //LCD_PrintNumber(1234);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -169,6 +182,14 @@ int main(void)
 	              Control_ActualizarDificultad(adc_val);
 	          }
 */
+	  LCD_Clear();
+
+	  LCD_SetCursor(0,0);
+	  LCD_Print("Partida");
+
+	  LCD_SetCursor(1,0);
+	  LCD_Print("en curso...");
+
 	  while(!RondaTerminada()) {
 	  		  HAL_NVIC_DisableIRQ(EXTI0_IRQn);
 	  		  HAL_NVIC_DisableIRQ(EXTI1_IRQn);
@@ -277,7 +298,7 @@ int main(void)
 	  		  ISR = 0;
 	  	  }
 
-	  //uint8_t ganador = 0;
+	  ganador = 0;
 
 	  for(int i=1; i<num_jugadores; i++)
 	  {
@@ -286,6 +307,34 @@ int main(void)
 	          ganador = i;
 	      }
 	  }
+
+	  for(int i=0; i<num_jugadores; i++)
+	  {
+	      LCD_Clear();
+
+	      LCD_SetCursor(0,0);
+	      LCD_Print("Jugador ");
+
+	      LCD_PrintNumber(i+1);
+
+	      LCD_SetCursor(1,0);
+	      LCD_Print("Pts:");
+
+	      LCD_PrintNumber(puntuacion[i]);
+
+	      HAL_Delay(3000);
+	  }
+
+	  LCD_Clear();
+
+	  LCD_SetCursor(0,0);
+	  LCD_Print("GANADOR");
+
+	  LCD_SetCursor(1,0);
+	  LCD_Print("Jugador ");
+
+	  LCD_PrintNumber(ganador + 1);
+	  HAL_Delay(5000);
 
   }
   /* USER CODE END 3 */
@@ -446,12 +495,26 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PC0 PC1 PC2 PC3
+                           PC4 PC5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB0 PB1 PB2 PB3 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
