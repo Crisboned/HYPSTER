@@ -30,14 +30,14 @@ uint8_t CONTROL_EsPulsacionCorrecta(uint8_t jugador_led, int8_t jugador_pulsado)
 {
     return jugador_led == jugador_pulsado;
 }
-//control potenciometro
-// Ajusta esto si usas 10 bits (1023) en vez de 12 (4095)
+// Control Potenciómetro
+// 12 bits (4095)
 #define ADC_MAX     4095u
-#define TH_FACIL    (ADC_MAX / 3u)        // 0      .. ~1365
-#define TH_MEDIA    (2u * ADC_MAX / 3u)   // ~1366 .. ~2730
-// DIFICIL        // ~2731 .. 4095
+#define TH_FACIL    (ADC_MAX / 3u)
+#define TH_MEDIA    (2u * ADC_MAX / 3u)
 
-// Cambia estos pines por los de tus LEDs reales
+
+// LEDs de dificultad
 #define LED_FACIL_GPIO_Port   GPIOD
 #define LED_FACIL_Pin         GPIO_PIN_12
 
@@ -61,7 +61,7 @@ void Control_ActualizarDificultad(uint16_t adc_val)
         nueva = DIFICULTAD_DIFICIL;
     }
 
-    // Si quieres, puedes evitar reconfigurar LEDs si no cambia
+    // Evitar reconfigurar LEDs si no cambia
     if (nueva != dificultad_actual) {
         dificultad_actual = nueva;
 

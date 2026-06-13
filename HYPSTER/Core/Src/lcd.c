@@ -34,7 +34,6 @@ static void LCD_SendCommand(uint8_t cmd);
 static void LCD_SendData(uint8_t data);
 static void LCD_PulseEnable(void);
 
-/* -------------------------------------------------- */
 
 static void LCD_PulseEnable(void)
 {
@@ -45,26 +44,18 @@ static void LCD_PulseEnable(void)
     HAL_Delay(5);
 }
 
-/* -------------------------------------------------- */
-
 static void LCD_SendNibble(uint8_t nibble)
 {
-    HAL_GPIO_WritePin(LCD_D4_PORT, LCD_D4_PIN,
-                      (nibble & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LCD_D4_PORT, LCD_D4_PIN, (nibble & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
-    HAL_GPIO_WritePin(LCD_D5_PORT, LCD_D5_PIN,
-                      (nibble & 0x02) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LCD_D5_PORT, LCD_D5_PIN, (nibble & 0x02) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
-    HAL_GPIO_WritePin(LCD_D6_PORT, LCD_D6_PIN,
-                      (nibble & 0x04) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LCD_D6_PORT, LCD_D6_PIN, (nibble & 0x04) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
-    HAL_GPIO_WritePin(LCD_D7_PORT, LCD_D7_PIN,
-                      (nibble & 0x08) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LCD_D7_PORT, LCD_D7_PIN, (nibble & 0x08) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
     LCD_PulseEnable();
 }
-
-/* -------------------------------------------------- */
 
 static void LCD_SendCommand(uint8_t cmd)
 {
@@ -75,8 +66,6 @@ static void LCD_SendCommand(uint8_t cmd)
 
     HAL_Delay(2);
 }
-
-/* -------------------------------------------------- */
 
 static void LCD_SendData(uint8_t data)
 {
@@ -90,12 +79,12 @@ static void LCD_SendData(uint8_t data)
 
 /* -------------------------------------------------- */
 
+/* Funciones lcd.h */
+
 void LCD_Init(void)
 {
     HAL_Delay(50);
 
-    //HAL_GPIO_WritePin(LCD_RS_PORT, LCD_RS_PIN, GPIO_PIN_RESET);
-
     LCD_SendNibble(0x03);
     HAL_Delay(5);
 
@@ -103,13 +92,8 @@ void LCD_Init(void)
     HAL_Delay(5);
 
     LCD_SendNibble(0x03);
-    //HAL_Delay(5);
 
-    //LCD_SendNibble(0x02);
-    //HAL_Delay(5);
-
-    LCD_SendCommand(0x02);
-
+    LCD_SendCommand(0x02); // Modo 4 bits
     LCD_SendCommand(0x28); // 4 bits, 2 líneas
     LCD_SendCommand(0x0C); // display ON
     LCD_SendCommand(0x06); // incremento cursor
@@ -118,32 +102,18 @@ void LCD_Init(void)
     HAL_Delay(5);
 }
 
-/* -------------------------------------------------- */
-
 void LCD_Clear(void)
 {
     LCD_SendCommand(0x01);
     HAL_Delay(2);
 }
 
-/* -------------------------------------------------- */
-
 void LCD_SetCursor(uint8_t row, uint8_t col)
 {
-    /*uint8_t address;
-
-    if(row == 0)
-        address = 0x80 + col;
-    else
-        address = 0xC0 + col;
-
-    LCD_SendCommand(address);*/
-	uint8_t address = (row == 0) ? 0x00 : 0x40;
+    uint8_t address = (row == 0) ? 0x00 : 0x40;
 	address += col;
 	LCD_SendCommand(0x80 | address);
 }
-
-/* -------------------------------------------------- */
 
 void LCD_Print(char *str)
 {
