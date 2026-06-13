@@ -59,6 +59,7 @@ volatile uint32_t tiempo_max = 3000;
 uint8_t activaciones[4] = {0}; //asegurar que todos los jugadores reciben 5 encendidos en total
 uint32_t puntuacion[4] = {0};
 uint8_t ganador = 0;
+volatile uint8_t num_jugadores = 4; // por defecto
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,7 +75,7 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN 0 */
 uint8_t RondaTerminada(void)
 {
-    for(int i=0; i<4; i++)
+    for(int i=0; i<num_jugadores; i++)
     {
         if(activaciones[i] < 5)
             return 0;
@@ -118,22 +119,13 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
-  static uint8_t num_jugadores = 4;
-
   HAL_ADC_Start(&hadc1);
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
   uint16_t aleatorio = HAL_ADC_GetValue(&hadc1);
   srand(aleatorio);
 
-  for(int j=0; j<4; j++)
-  {
-      activaciones[j] = 0;
-      puntuacion[j] = 0;
-  }
-
   LCD_Init();
   LCD_Clear();
-
 
   /* USER CODE END 2 */
 
@@ -145,6 +137,81 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+	  for(int j=0; j<4; j++)
+	  {
+	      activaciones[j] = 0;
+	      puntuacion[j] = 0;
+	  }
+
+	  // SELECCIÓN DE JUGADORES
+	  LCD_Clear();
+
+	  LCD_SetCursor(0,0);
+	  LCD_Print("Selecciona");
+
+	  LCD_SetCursor(1,0);
+	  LCD_Print("jugadores");
+
+	  HAL_Delay(2000);
+
+	  uint32_t inicio = HAL_GetTick();
+	  uint8_t jugadores_previos = 0; 	// valor imposible
+
+	  while((HAL_GetTick() - inicio) < 10000)
+	  {
+	      HAL_ADC_Start(&hadc1);
+	      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
+	      adc_val = HAL_ADC_GetValue(&hadc1);
+
+	      uint8_t jugadores;
+
+	      if(adc_val <= 1365)
+	      {
+	          jugadores = 2;
+	      }
+	      else if(adc_val <= 2730)
+	      {
+	          jugadores = 3;
+	      }
+	      else
+	      {
+	          jugadores = 4;
+	      }
+
+	      if(jugadores != jugadores_previos)
+	      {
+	          LCD_Clear();
+
+	          LCD_SetCursor(0,0);
+	          LCD_Print("Jugadores:");
+
+	          LCD_SetCursor(1,0);
+
+	          LCD_PrintNumber(jugadores);
+
+	          jugadores_previos = jugadores;
+	      }
+
+	      HAL_Delay(50);
+	  }
+
+	  CONTROL_SetNumJugadores(jugadores_previos);
+
+	  num_jugadores = CONTROL_GetNumJugadores();
+
+	  LCD_Clear();
+
+	  LCD_SetCursor(0,0);
+	  LCD_Print("JUGADORES:");
+
+	  LCD_SetCursor(1,0);
+	  LCD_PrintNumber(CONTROL_GetNumJugadores());
+
+	  HAL_Delay(3000);
+
+
+	  // SELECCIÓN DE DIFICULTAD
 	  LCD_Clear();
 
 	  LCD_SetCursor(0,0);
@@ -155,7 +222,7 @@ int main(void)
 
 	  HAL_Delay(2000);
 
-	  uint32_t inicio = HAL_GetTick();
+	  inicio = HAL_GetTick();
 	  Dificultad_t dificultad_anterior = 255;   // valor imposible
 
 	  while((HAL_GetTick() - inicio) < 10000)
@@ -217,7 +284,7 @@ int main(void)
 	  LCD_Clear();
 
 	  LCD_SetCursor(0,0);
-	  LCD_Print("Dificultad:");
+	  LCD_Print("DIFICULTAD:");
 
 	  switch(Control_GetDificultad())
 	  {

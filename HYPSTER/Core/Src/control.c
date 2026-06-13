@@ -8,7 +8,7 @@
 #include "control.h"
 #include <stdlib.h>
 
-static uint8_t num_jugadores = 4; // por defecto
+extern volatile uint8_t num_jugadores;
 
 void CONTROL_SetNumJugadores(uint8_t n)
 {
