@@ -82,13 +82,32 @@ void POT_SeleccionarJugadores(void)
         HAL_Delay(50);
     }
 
+    CONTROL_SetNumJugadores(jugadores_previos);
+    num_jugadores = CONTROL_GetNumJugadores();
 
+    LCD_Clear();
+
+    LCD_SetCursor(0,0);
+    LCD_Print("JUGADORES:");
+
+    LCD_SetCursor(1,0);
+    LCD_PrintNumber(CONTROL_GetNumJugadores());
+
+    HAL_Delay(3000);
 }
 
 void POT_SeleccionarDificultad(void)
 {
     // SELECCIÓN DE DIFICULTAD (copia literal de tu main)
+    LCD_Clear();
 
+    LCD_SetCursor(0,0);
+    LCD_Print("Selecciona");
+
+    LCD_SetCursor(1,0);
+    LCD_Print("dificultad");
+
+    HAL_Delay(2000);
 
     uint32_t inicio = HAL_GetTick();
     Dificultad_t dificultad_anterior = 255;   // valor imposible
@@ -149,6 +168,29 @@ void POT_SeleccionarDificultad(void)
             break;
     }
 
+    LCD_Clear();
 
+    LCD_SetCursor(0,0);
+    LCD_Print("DIFICULTAD:");
+
+    switch(Control_GetDificultad())
+    {
+        case DIFICULTAD_FACIL:
+            LCD_SetCursor(1,0);
+            LCD_Print("FACIL");
+            break;
+
+        case DIFICULTAD_MEDIA:
+            LCD_SetCursor(1,0);
+            LCD_Print("MEDIA");
+            break;
+
+        case DIFICULTAD_DIFICIL:
+            LCD_SetCursor(1,0);
+            LCD_Print("DIFICIL");
+            break;
+    }
+
+    HAL_Delay(3000);
 }
 
