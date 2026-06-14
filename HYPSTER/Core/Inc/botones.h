@@ -15,5 +15,6 @@ void BOTONES_Init(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 int8_t BOTONES_GetJugador(void);
 void BOTONES_Clear(void);
+voit BOTON_MENU_PULSADO(void);
 
 #endif /* INC_BOTONES_H_ */

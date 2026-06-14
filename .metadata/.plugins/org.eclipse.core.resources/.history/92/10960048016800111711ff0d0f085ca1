@@ -126,7 +126,6 @@ int main(void)
 
   LCD_Init();
   LCD_Clear();
-  FSM_Init();
 
   /* USER CODE END 2 */
 
@@ -137,10 +136,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  FSM_Update();
 
-//inicialización
-	  /*
 	  for(int j=0; j<4; j++)
 	  {
 	      activaciones[j] = 0;
@@ -460,7 +456,7 @@ int main(void)
 	  LCD_PrintNumber(ganador + 1);
 	  HAL_Delay(5000);
 
-  }*/
+  }
   /* USER CODE END 3 */
 }
 
