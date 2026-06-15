@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "leds.h"
 #include "botones.h"
-#include "control.h"
+#include "potenciometro.h"
 #include "timer.h"
 #include "lcd.h"
 /* USER CODE END Includes */
@@ -196,9 +196,9 @@ int main(void)
 	      HAL_Delay(50);
 	  }
 
-	  CONTROL_SetNumJugadores(jugadores_previos);
+	  POT_SetNumJugadores(jugadores_previos);
 
-	  num_jugadores = CONTROL_GetNumJugadores();
+	  num_jugadores = POT_GetNumJugadores();
 
 	  LCD_Clear();
 
@@ -206,7 +206,7 @@ int main(void)
 	  LCD_Print("JUGADORES:");
 
 	  LCD_SetCursor(1,0);
-	  LCD_PrintNumber(CONTROL_GetNumJugadores());
+	  LCD_PrintNumber(POT_GetNumJugadores());
 
 	  HAL_Delay(3000);
 
@@ -232,9 +232,9 @@ int main(void)
 
 	      adc_val = HAL_ADC_GetValue(&hadc1);
 
-	      Control_ActualizarDificultad(adc_val);
+	      POT_ActualizarDificultad(adc_val);
 
-	      Dificultad_t dificultad_actual = Control_GetDificultad();
+	      Dificultad_t dificultad_actual = POT_GetDificultad();
 
 	      if(dificultad_actual != dificultad_anterior)
 	      {
@@ -266,7 +266,7 @@ int main(void)
 	      HAL_Delay(50);
 	  }
 
-	  switch(Control_GetDificultad())
+	  switch(POT_GetDificultad())
 	  {
 	      case DIFICULTAD_FACIL:
 	          tiempo_max = 3000;
@@ -286,7 +286,7 @@ int main(void)
 	  LCD_SetCursor(0,0);
 	  LCD_Print("DIFICULTAD:");
 
-	  switch(Control_GetDificultad())
+	  switch(POT_GetDificultad())
 	  {
 	      case DIFICULTAD_FACIL:
 	          LCD_SetCursor(1,0);

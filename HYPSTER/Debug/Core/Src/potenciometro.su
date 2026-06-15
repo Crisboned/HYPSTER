@@ -1,0 +1,6 @@
+potenciometro.c:12:6:POT_SetNumJugadores	16	static
+potenciometro.c:18:9:POT_GetNumJugadores	4	static
+potenciometro.c:23:9:POT_ElegirJugadorAleatorio	8	static
+potenciometro.c:28:9:POT_EsPulsacionCorrecta	16	static
+potenciometro.c:51:6:POT_ActualizarDificultad	24	static
+potenciometro.c:87:14:POT_GetDificultad	4	static
