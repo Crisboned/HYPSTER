@@ -11,9 +11,14 @@
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 
+// Pin del botón de menú
+#define BOTON_MENU_Pin      GPIO_PIN_13
+#define BOTON_MENU_GPIO_Port GPIOC
+
 void BOTONES_Init(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 int8_t BOTONES_GetJugador(void);
 void BOTONES_Clear(void);
+uint8_t Boton_Menu_Pulsado(void);
 
 #endif /* INC_BOTONES_H_ */

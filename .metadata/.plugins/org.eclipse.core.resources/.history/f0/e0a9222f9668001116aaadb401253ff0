@@ -1,0 +1,73 @@
+/*
+ * fsm.c
+ *
+ *  Created on: 15 jun. 2026
+ *      Author: Critina Gomez
+ */
+#include "fsm.h"
+#include "lcd.h"
+#include "potenciometro.h"
+#include "botones.h"
+#include "leds.h"
+#include "main.h"
+
+extern uint8_t num_jugadores;
+extern uint32_t tiempo_max;
+
+static Estado_t estado = ESTADO_INICIO;
+
+static void Estado_Inicio(void);
+static void Estado_SelectJugadores(void);
+static void Estado_SelectDificultad(void);
+static void Estado_Juego(void);
+static void Estado_Fin(void);
+
+void FSM_Init(void)
+{
+    estado = ESTADO_INICIO;
+}
+void FSM_Update(void)
+{
+    switch(estado)
+    {
+        case ESTADO_INICIO:
+            Estado_Inicio();
+            break;
+
+        case ESTADO_SELECT_JUGADORES:
+            Estado_SelectJugadores();
+            break;
+
+        case ESTADO_SELECT_DIFICULTAD:
+            Estado_SelectDificultad();
+            break;
+
+        case ESTADO_JUEGO:
+            Estado_Juego();
+            break;
+
+        case ESTADO_FIN:
+            Estado_Fin();
+            break;
+    }
+}
+static void Estado_Inicio(void)
+{
+    LCD_Clear();
+    LCD_SetCursor(0,0);
+    LCD_Print("Pulsa boton");
+    LCD_SetCursor(1,0);
+    LCD_Print("para empezar");
+
+    if (Boton_Menu_Pulsado()) {
+        estado = ESTADO_SELECT_JUGADORES;
+    }
+}
+static void Estado_SelectJugadores(void)
+{
+    POT_SeleccionarJugadores();
+
+    if (Boton_Menu_Pulsado()) {
+        estado = ESTADO_SELECT_DIFICULTAD;
+    }
+}

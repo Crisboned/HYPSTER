@@ -1,0 +1,23 @@
+/*
+ * logica.c
+ *
+ *  Created on: 15 jun. 2026
+ *      Author: Critina Gomez
+ */
+
+#include "logica.h"
+#include <stdlib.h>
+
+uint8_t LOG_ElegirJugadorAleatorio(uint8_t num_jugadores)
+{
+    if(num_jugadores < 2 || num_jugadores > 4)
+        return 0;
+
+    return rand() % num_jugadores;
+}
+
+uint8_t LOG_EsPulsacionCorrecta(uint8_t jugador_led, int8_t jugador_pulsado)
+{
+    return (jugador_led == jugador_pulsado);
+}
+

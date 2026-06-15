@@ -9,22 +9,26 @@
 #define INC_POTENCIOMETRO_H_
 
 #include <stdint.h>
-
 #include "stm32f4xx_hal.h"
+#include "main.h"
 
 typedef enum {
     DIFICULTAD_FACIL = 0,
     DIFICULTAD_MEDIA,
     DIFICULTAD_DIFICIL
 } Dificultad_t;
+void POT_Init(ADC_HandleTypeDef *hadc);
 
-void POT_ActualizarDificultad(uint16_t adc_val);
-Dificultad_t POT_GetDificultad(void);
+uint16_t POT_LeerADC(void);
 
 void POT_SetNumJugadores(uint8_t n);
 uint8_t POT_GetNumJugadores(void);
 
-uint8_t CONTROL_ElegirJugadorAleatorio(void);
-uint8_t CONTROL_EsPulsacionCorrecta(uint8_t jugador_led, int8_t jugador_pulsado);
+void POT_ActualizarDificultad(uint16_t adc_val);
+Dificultad_t POT_GetDificultad(void);
+
+void POT_SeleccionarJugadores(void);
+void POT_SeleccionarDificultad(void);
+uint32_t POT_GetTiempoMax(void);
 
 #endif /* INC_POTENCIOMETRO_H_ */

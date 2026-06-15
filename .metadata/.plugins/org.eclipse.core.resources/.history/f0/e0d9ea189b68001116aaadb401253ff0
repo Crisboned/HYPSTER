@@ -1,0 +1,257 @@
+/*
+ * fsm.c
+ *
+ *  Created on: 15 jun. 2026
+ *      Author: Critina Gomez
+ */
+#include "fsm.h"
+#include "lcd.h"
+#include "potenciometro.h"
+#include "botones.h"
+#include "leds.h"
+#include "main.h"
+#include "logica.h"
+
+volatile uint32_t contador = 0;
+volatile uint32_t espera = 0;
+volatile uint8_t ISR = 0;
+volatile uint16_t adc_val;
+extern volatile uint32_t tiempo_reaccion;
+volatile uint32_t tiempo_max = 3000;
+uint8_t activaciones[4] = {0}; //asegurar que todos los jugadores reciben 5 encendidos en total
+uint32_t puntuacion[4] = {0};
+uint8_t ganador = 0;
+volatile uint8_t num_jugadores = 4; // por defecto
+
+static Estado_t estado = ESTADO_INICIO;
+
+static void Estado_Inicio(void);
+static void Estado_SelectJugadores(void);
+static void Estado_SelectDificultad(void);
+static void Estado_Juego(void);
+static void Estado_Fin(void);
+
+void FSM_Init(void)
+{
+    estado = ESTADO_INICIO;
+    for(int j=0; j<4; j++)
+   	  {
+   	      activaciones[j] = 0;
+   	      puntuacion[j] = 0;
+   	  }
+}
+void FSM_Update(void)
+{
+    switch(estado)
+    {
+        case ESTADO_INICIO:
+            Estado_Inicio();
+            break;
+
+        case ESTADO_SELECT_JUGADORES:
+            Estado_SelectJugadores();
+            break;
+
+        case ESTADO_SELECT_DIFICULTAD:
+            Estado_SelectDificultad();
+            break;
+
+        case ESTADO_JUEGO:
+            Estado_Juego();
+            break;
+
+        case ESTADO_FIN:
+            Estado_Fin();
+            break;
+    }
+}
+static void Estado_Inicio(void)
+{
+    LCD_Clear();
+    LCD_SetCursor(0,0);
+    LCD_Print("Pulsa boton");
+    LCD_SetCursor(1,0);
+    LCD_Print("para empezar");
+
+    if (Boton_Menu_Pulsado()) {
+        estado = ESTADO_SELECT_JUGADORES;
+    }
+}
+static void Estado_SelectJugadores(void)
+{
+	LCD_Clear();
+	    LCD_SetCursor(0,0);
+	    LCD_Print("Selecciona");
+	    LCD_SetCursor(1,0);
+	    LCD_Print("jugadores");
+	    HAL_Delay(2000);
+
+	POT_SeleccionarJugadores();
+
+    if (Boton_Menu_Pulsado()) {
+        estado = ESTADO_SELECT_DIFICULTAD;
+    }
+
+}
+static void Estado_SelectDificultad(void){
+		LCD_Clear();
+	    LCD_SetCursor(0,0);
+	    LCD_Print("Selecciona");
+	    LCD_SetCursor(1,0);
+	    LCD_Print("dificultad");
+	    HAL_Delay(2000);
+	    POT_SeleccionarDificultad();
+	    if (Boton_Menu_Pulsado()) {
+	            estado = ESTADO_JUEGO;
+	        }
+}
+static void Estado_Juego(void){
+	LCD_Clear();
+	    LCD_SetCursor(0,0);
+	    LCD_Print("Partida");
+	    LCD_SetCursor(1,0);
+	    LCD_Print("en curso...");
+	    HAL_Delay(1500);
+
+	    LCD_Clear();
+
+	    	  LCD_SetCursor(0,0);
+	    	  LCD_Print("Partida");
+
+	    	  LCD_SetCursor(1,0);
+	    	  LCD_Print("en curso...");
+
+	    	  while(!LOG_RondaTerminada()) {
+	    	  		HAL_NVIC_DisableIRQ(EXTI0_IRQn);
+	    	  		HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+	    	  		HAL_NVIC_DisableIRQ(EXTI2_IRQn);
+	    	  		HAL_NVIC_DisableIRQ(EXTI3_IRQn);
+
+	    	  		BOTONES_Clear();
+
+	    	  		LEDS_AllOff();
+
+	    	  		uint8_t led_actual;
+
+	    	  		do
+	    	  		{
+	    	  		    led_actual = LEDS_Random(num_jugadores);
+
+	    	  		} while(activaciones[led_actual] >= 5);
+
+	    	  		activaciones[led_actual]++;
+
+	    	  		espera = 2000 + (rand() % 2001);   // 2000–4000 ms
+	    	  		HAL_Delay(espera);
+
+	    	  		LEDS_On(led_actual);
+
+	    	  		TIMER_Reset();
+	    	  		TIMER_Start();
+
+	    	  		HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+	    	  		HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+	    	  		HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+	    	  		HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+	    	  		int8_t jugador = -1;
+	    	  		while(jugador == -1){
+	    	  			jugador = BOTONES_GetJugador();
+	    	  			contador++;
+	    	  			if(tiempo_reaccion >= tiempo_max)
+	    	  			{
+	    	  			      TIMER_Stop();
+
+	    	  			      jugador = -2;   // timeout
+
+	    	  			      break;
+	    	  			}
+	    	  			if (jugador == led_actual)
+	    	  			{
+	    	  			      TIMER_Stop();
+	    	  				  break;  // respuesta correcta
+	    	  			}
+	    	  			if (jugador != -1)
+	    	  			{
+	    	  				  TIMER_Stop();
+	    	  				  break;  // botón incorrecto (pulsa otro jugador)
+	    	  			}
+	    	  		}
+
+	    	  		// Guardar medida
+
+	    	  		// Comprobar si acertó
+	    	  		if (jugador == led_actual)
+	    	  		{
+	    	  		          // Acierto
+	    	  		          puntuacion[jugador] += tiempo_reaccion;	//sumar al jugador correcto su puntuación
+	    	  		          // Led fijo 2 segundos
+	    	  		          LEDS_AllOff();
+	    	  		          LEDS_On(led_actual);
+	    	  		          HAL_Delay(2000);
+	    	  		}
+	    	  		else if(jugador == -2)
+	    	  		{
+	    	  		          // Tiempo agotado
+	    	  		          puntuacion[led_actual] += tiempo_max; //sumar al jugador que no ha pulsado el tiempo max
+	    	  		          // Parpadeo de error: 10 parpadeos
+	    	  		          for(int k=0; k<10; k++)
+	    	  		          {
+	    	  		            	LEDS_AllOff();
+	    	  		            	HAL_Delay(100);
+
+	    	  		            	LEDS_On(led_actual);
+	    	  		            	HAL_Delay(100);
+	    	  		          }
+	    	  		}
+	    	  		else
+	    	  		{
+	    	  		          // Fallo jugador incorrecto
+	    	  		          puntuacion[jugador] += tiempo_max; //sumar al jugador incorrecto el tiempo max (penalización por pulsar cuando no debes)
+	    	  		          // Parpadeo de error: 5 parpadeos
+	    	  		          for(int k=0; k<5; k++)
+	    	  		          {
+	    	  		            	LEDS_AllOff();
+	    	  		            	HAL_Delay(100);
+
+	    	  		            	LEDS_On(led_actual);
+	    	  		            	HAL_Delay(100);
+	    	  		          }
+	    	  		}
+
+	    	  		HAL_Delay(5000);
+
+	    	  		contador = 0;
+	    	  		ISR = 0;
+	    	  }
+}
+static void Estado_Fin(void)
+{
+    // Mostrar puntuaciones
+    for(uint8_t i = 0; i < num_jugadores; i++)
+    {
+        LCD_Clear();
+        LCD_SetCursor(0,0);
+        LCD_Print("Jugador ");
+        LCD_PrintNumber(i + 1);
+
+        LCD_SetCursor(1,0);
+        LCD_Print("Pts: ");
+        LCD_PrintNumber(puntuacion[i]);
+
+        HAL_Delay(3000);
+    }
+
+    // Mostrar ganador
+    LCD_Clear();
+    LCD_SetCursor(0,0);
+    LCD_Print("GANADOR");
+
+    LCD_SetCursor(1,0);
+    LCD_Print("Jugador ");
+    LCD_PrintNumber(ganador + 1);
+
+    HAL_Delay(5000);
+
+    estado = ESTADO_INICIO;
+}

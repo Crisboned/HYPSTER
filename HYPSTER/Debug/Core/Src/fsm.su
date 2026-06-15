@@ -1,0 +1,7 @@
+fsm.c:40:6:FSM_Init	16	static
+fsm.c:49:6:FSM_Update	8	static
+fsm.c:74:13:Estado_Inicio	8	static
+fsm.c:86:13:Estado_SelectJugadores	8	static
+fsm.c:102:13:Estado_SelectDificultad	8	static
+fsm.c:228:13:Estado_Juego	32	static
+fsm.c:343:13:Estado_Fin	16	static

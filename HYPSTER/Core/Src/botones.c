@@ -9,6 +9,7 @@
 
 static volatile int8_t jugador_pulsado = -1;
 extern volatile uint8_t ISR;
+volatile uint8_t boton_menu_flag = 0;
 
 void BOTONES_Init(void)
 {
@@ -22,6 +23,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     else if (GPIO_Pin == GPIO_PIN_1) jugador_pulsado = 1;	//J2
     else if (GPIO_Pin == GPIO_PIN_2) jugador_pulsado = 2;	//J3
     else if (GPIO_Pin == GPIO_PIN_3) jugador_pulsado = 3;	//J4
+	if (GPIO_Pin == BOTON_MENU_Pin) {
+	        boton_menu_flag = 1;
+	    }
 }
 
 int8_t BOTONES_GetJugador(void)
@@ -34,3 +38,11 @@ void BOTONES_Clear(void)
     jugador_pulsado = -1;
 }
 
+uint8_t Boton_Menu_Pulsado(void)
+{
+    if (boton_menu_flag) {
+        boton_menu_flag = 0;
+        return 1;
+    }
+    return 0;
+}

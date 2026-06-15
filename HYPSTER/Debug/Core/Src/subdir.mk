@@ -6,8 +6,10 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/botones.c \
+../Core/Src/fsm.c \
 ../Core/Src/lcd.c \
 ../Core/Src/leds.c \
+../Core/Src/logica.c \
 ../Core/Src/main.c \
 ../Core/Src/potenciometro.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
@@ -20,8 +22,10 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/botones.o \
+./Core/Src/fsm.o \
 ./Core/Src/lcd.o \
 ./Core/Src/leds.o \
+./Core/Src/logica.o \
 ./Core/Src/main.o \
 ./Core/Src/potenciometro.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
@@ -34,8 +38,10 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/botones.d \
+./Core/Src/fsm.d \
 ./Core/Src/lcd.d \
 ./Core/Src/leds.d \
+./Core/Src/logica.d \
 ./Core/Src/main.d \
 ./Core/Src/potenciometro.d \
 ./Core/Src/stm32f4xx_hal_msp.d \

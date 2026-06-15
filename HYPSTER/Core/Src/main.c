@@ -28,6 +28,7 @@
 #include "potenciometro.h"
 #include "timer.h"
 #include "lcd.h"
+#include "fsm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,16 +74,7 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t RondaTerminada(void)
-{
-    for(int i=0; i<num_jugadores; i++)
-    {
-        if(activaciones[i] < 5)
-            return 0;
-    }
 
-    return 1;
-}
 
 /* USER CODE END 0 */
 
@@ -104,6 +96,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   LEDS_Init();
   BOTONES_Init();
+  FSM_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -117,6 +110,11 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
+  POT_Init(&hadc1);
+  LCD_Init();
+  LCD_Clear();
+
+
   /* USER CODE BEGIN 2 */
 
   HAL_ADC_Start(&hadc1);
@@ -124,8 +122,6 @@ int main(void)
   uint16_t aleatorio = HAL_ADC_GetValue(&hadc1);
   srand(aleatorio);
 
-  LCD_Init();
-  LCD_Clear();
 
   /* USER CODE END 2 */
 
@@ -136,326 +132,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-	  for(int j=0; j<4; j++)
-	  {
-	      activaciones[j] = 0;
-	      puntuacion[j] = 0;
-	  }
-
-	  // SELECCIÓN DE JUGADORES
-	  LCD_Clear();
-
-	  LCD_SetCursor(0,0);
-	  LCD_Print("Selecciona");
-
-	  LCD_SetCursor(1,0);
-	  LCD_Print("jugadores");
-
-	  HAL_Delay(2000);
-
-	  uint32_t inicio = HAL_GetTick();
-	  uint8_t jugadores_previos = 0; 	// valor imposible
-
-	  while((HAL_GetTick() - inicio) < 10000)
-	  {
-	      HAL_ADC_Start(&hadc1);
-	      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-
-	      adc_val = HAL_ADC_GetValue(&hadc1);
-
-	      uint8_t jugadores;
-
-	      if(adc_val <= 1365)
-	      {
-	          jugadores = 2;
-	      }
-	      else if(adc_val <= 2730)
-	      {
-	          jugadores = 3;
-	      }
-	      else
-	      {
-	          jugadores = 4;
-	      }
-
-	      if(jugadores != jugadores_previos)
-	      {
-	          LCD_Clear();
-
-	          LCD_SetCursor(0,0);
-	          LCD_Print("Jugadores:");
-
-	          LCD_SetCursor(1,0);
-
-	          LCD_PrintNumber(jugadores);
-
-	          jugadores_previos = jugadores;
-	      }
-
-	      HAL_Delay(50);
-	  }
-
-	  POT_SetNumJugadores(jugadores_previos);
-
-	  num_jugadores = POT_GetNumJugadores();
-
-	  LCD_Clear();
-
-	  LCD_SetCursor(0,0);
-	  LCD_Print("JUGADORES:");
-
-	  LCD_SetCursor(1,0);
-	  LCD_PrintNumber(POT_GetNumJugadores());
-
-	  HAL_Delay(3000);
-
-
-	  // SELECCIÓN DE DIFICULTAD
-	  LCD_Clear();
-
-	  LCD_SetCursor(0,0);
-	  LCD_Print("Selecciona");
-
-	  LCD_SetCursor(1,0);
-	  LCD_Print("dificultad");
-
-	  HAL_Delay(2000);
-
-	  inicio = HAL_GetTick();
-	  Dificultad_t dificultad_anterior = 255;   // valor imposible
-
-	  while((HAL_GetTick() - inicio) < 10000)
-	  {
-	      HAL_ADC_Start(&hadc1);
-	      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-
-	      adc_val = HAL_ADC_GetValue(&hadc1);
-
-	      POT_ActualizarDificultad(adc_val);
-
-	      Dificultad_t dificultad_actual = POT_GetDificultad();
-
-	      if(dificultad_actual != dificultad_anterior)
-	      {
-	          LCD_Clear();
-
-	          LCD_SetCursor(0,0);
-	          LCD_Print("Seleccionando");
-
-	          LCD_SetCursor(1,0);
-
-	          switch(dificultad_actual)
-	          {
-	              case DIFICULTAD_FACIL:
-	                  LCD_Print("FACIL");
-	                  break;
-
-	              case DIFICULTAD_MEDIA:
-	                  LCD_Print("MEDIA");
-	                  break;
-
-	              case DIFICULTAD_DIFICIL:
-	                  LCD_Print("DIFICIL");
-	                  break;
-	          }
-
-	          dificultad_anterior = dificultad_actual;
-	      }
-
-	      HAL_Delay(50);
-	  }
-
-	  switch(POT_GetDificultad())
-	  {
-	      case DIFICULTAD_FACIL:
-	          tiempo_max = 3000;
-	          break;
-
-	      case DIFICULTAD_MEDIA:
-	          tiempo_max = 2000;
-	          break;
-
-	      case DIFICULTAD_DIFICIL:
-	          tiempo_max = 1000;
-	          break;
-	  }
-
-	  LCD_Clear();
-
-	  LCD_SetCursor(0,0);
-	  LCD_Print("DIFICULTAD:");
-
-	  switch(POT_GetDificultad())
-	  {
-	      case DIFICULTAD_FACIL:
-	          LCD_SetCursor(1,0);
-	          LCD_Print("FACIL");
-	          break;
-
-	      case DIFICULTAD_MEDIA:
-	          LCD_SetCursor(1,0);
-	          LCD_Print("MEDIA");
-	          break;
-
-	      case DIFICULTAD_DIFICIL:
-	          LCD_SetCursor(1,0);
-	          LCD_Print("DIFICIL");
-	          break;
-	  }
-
-	  HAL_Delay(3000);
-
-	  LCD_Clear();
-
-	  LCD_SetCursor(0,0);
-	  LCD_Print("Partida");
-
-	  LCD_SetCursor(1,0);
-	  LCD_Print("en curso...");
-
-	  while(!RondaTerminada()) {
-	  		HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-	  		HAL_NVIC_DisableIRQ(EXTI1_IRQn);
-	  		HAL_NVIC_DisableIRQ(EXTI2_IRQn);
-	  		HAL_NVIC_DisableIRQ(EXTI3_IRQn);
-
-	  		BOTONES_Clear();
-
-	  		LEDS_AllOff();
-
-	  		uint8_t led_actual;
-
-	  		do
-	  		{
-	  		    led_actual = LEDS_Random(num_jugadores);
-
-	  		} while(activaciones[led_actual] >= 5);
-
-	  		activaciones[led_actual]++;
-
-	  		espera = 2000 + (rand() % 2001);   // 2000–4000 ms
-	  		HAL_Delay(espera);
-
-	  		LEDS_On(led_actual);
-
-	  		TIMER_Reset();
-	  		TIMER_Start();
-
-	  		HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-	  		HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	  		HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-	  		HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-	  		int8_t jugador = -1;
-	  		while(jugador == -1){
-	  			jugador = BOTONES_GetJugador();
-	  			contador++;
-	  			if(tiempo_reaccion >= tiempo_max)
-	  			{
-	  			      TIMER_Stop();
-
-	  			      jugador = -2;   // timeout
-
-	  			      break;
-	  			}
-	  			if (jugador == led_actual)
-	  			{
-	  			      TIMER_Stop();
-	  				  break;  // respuesta correcta
-	  			}
-	  			if (jugador != -1)
-	  			{
-	  				  TIMER_Stop();
-	  				  break;  // botón incorrecto (pulsa otro jugador)
-	  			}
-	  		}
-
-	  		// Guardar medida
-
-	  		// Comprobar si acertó
-	  		if (jugador == led_actual)
-	  		{
-	  		          // Acierto
-	  		          puntuacion[jugador] += tiempo_reaccion;	//sumar al jugador correcto su puntuación
-	  		          // Led fijo 2 segundos
-	  		          LEDS_AllOff();
-	  		          LEDS_On(led_actual);
-	  		          HAL_Delay(2000);
-	  		}
-	  		else if(jugador == -2)
-	  		{
-	  		          // Tiempo agotado
-	  		          puntuacion[led_actual] += tiempo_max; //sumar al jugador que no ha pulsado el tiempo max
-	  		          // Parpadeo de error: 10 parpadeos
-	  		          for(int k=0; k<10; k++)
-	  		          {
-	  		            	LEDS_AllOff();
-	  		            	HAL_Delay(100);
-
-	  		            	LEDS_On(led_actual);
-	  		            	HAL_Delay(100);
-	  		          }
-	  		}
-	  		else
-	  		{
-	  		          // Fallo jugador incorrecto
-	  		          puntuacion[jugador] += tiempo_max; //sumar al jugador incorrecto el tiempo max (penalización por pulsar cuando no debes)
-	  		          // Parpadeo de error: 5 parpadeos
-	  		          for(int k=0; k<5; k++)
-	  		          {
-	  		            	LEDS_AllOff();
-	  		            	HAL_Delay(100);
-
-	  		            	LEDS_On(led_actual);
-	  		            	HAL_Delay(100);
-	  		          }
-	  		}
-
-	  		HAL_Delay(5000);
-
-	  		contador = 0;
-	  		ISR = 0;
-	  }
-
-	  ganador = 0;
-
-	  for(int i=1; i<num_jugadores; i++)
-	  {
-	      if(puntuacion[i] < puntuacion[ganador])
-	      {
-	          ganador = i;
-	      }
-	  }
-
-	  for(int i=0; i<num_jugadores; i++)
-	  {
-	      LCD_Clear();
-
-	      LCD_SetCursor(0,0);
-	      LCD_Print("Jugador ");
-
-	      LCD_PrintNumber(i+1);
-
-	      LCD_SetCursor(1,0);
-	      LCD_Print("Pts:");
-
-	      LCD_PrintNumber(puntuacion[i]);
-
-	      HAL_Delay(3000);
-	  }
-
-	  LCD_Clear();
-
-	  LCD_SetCursor(0,0);
-	  LCD_Print("GANADOR");
-
-	  LCD_SetCursor(1,0);
-	  LCD_Print("Jugador ");
-
-	  LCD_PrintNumber(ganador + 1);
-	  HAL_Delay(5000);
-
+  FSM_Update();
   }
   /* USER CODE END 3 */
 }
