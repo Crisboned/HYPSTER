@@ -12,7 +12,7 @@
 
 static ADC_HandleTypeDef *pot_adc = NULL;
 
-static uint8_t num_jugadores = 4;
+extern volatile uint8_t num_jugadores;
 
 static Dificultad_t dificultad_actual = DIFICULTAD_FACIL;
 
@@ -116,7 +116,7 @@ void POT_SeleccionarJugadores(void)
         	            jugadores_previos = jugadores;
         	        }
 
-        	        HAL_Delay(50);
+        	        //HAL_Delay(50);
         	    }
 
         	POT_SetNumJugadores(jugadores_previos);

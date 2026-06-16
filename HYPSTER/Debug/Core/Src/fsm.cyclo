@@ -1,0 +1,7 @@
+../Core/Src/fsm.c:44:6:FSM_Init	2
+../Core/Src/fsm.c:53:6:FSM_Update	6
+../Core/Src/fsm.c:78:13:Estado_Inicio	2
+../Core/Src/fsm.c:91:13:Estado_SelectJugadores	6
+../Core/Src/fsm.c:137:13:Estado_SelectDificultad	7
+../Core/Src/fsm.c:181:13:Estado_Juego	12
+../Core/Src/fsm.c:296:13:Estado_Fin	2

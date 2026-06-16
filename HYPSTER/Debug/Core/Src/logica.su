@@ -1,5 +1,5 @@
-logica.c:11:9:LOG_ElegirJugadorAleatorio	16	static
-logica.c:19:9:LOG_EsPulsacionCorrecta	16	static
-logica.c:24:9:LOG_RondaTerminada	24	static
-logica.c:34:9:LOG_CalcularGanador	32	static
-logica.c:51:6:LOG_SumarPunto	16	static
+../Core/Src/logica.c:11:9:LOG_ElegirJugadorAleatorio	16	static
+../Core/Src/logica.c:19:9:LOG_EsPulsacionCorrecta	16	static
+../Core/Src/logica.c:24:9:LOG_RondaTerminada	24	static
+../Core/Src/logica.c:34:9:LOG_CalcularGanador	32	static
+../Core/Src/logica.c:51:6:LOG_SumarPunto	16	static

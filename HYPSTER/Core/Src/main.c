@@ -60,7 +60,6 @@ volatile uint32_t tiempo_max = 3000;
 uint8_t activaciones[4] = {0}; //asegurar que todos los jugadores reciben 5 encendidos en total
 uint32_t puntuacion[4] = {0};
 uint8_t ganador = 0;
-volatile uint8_t num_jugadores = 4; // por defecto
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,6 +96,7 @@ int main(void)
   LEDS_Init();
   BOTONES_Init();
   FSM_Init();
+  POT_Init(&hadc1);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -110,17 +110,15 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
-  POT_Init(&hadc1);
-  LCD_Init();
-  LCD_Clear();
-
-
   /* USER CODE BEGIN 2 */
 
   HAL_ADC_Start(&hadc1);
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
   uint16_t aleatorio = HAL_ADC_GetValue(&hadc1);
   srand(aleatorio);
+
+  LCD_Init();
+  LCD_Clear();
 
 
   /* USER CODE END 2 */
@@ -304,6 +302,12 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PC0 PC1 PC2 PC3
                            PC4 PC5 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
@@ -338,6 +342,9 @@ static void MX_GPIO_Init(void)
 
   HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

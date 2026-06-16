@@ -13,23 +13,27 @@
 #include "logica.h"
 #include "timer.h"
 #include <stdlib.h>
+#include <string.h>
 
 
 // Variables internas del módulo FSM (no globales del proyecto)
 static volatile uint32_t contador = 0;
 static volatile uint32_t espera = 0;
 static volatile uint8_t ISR = 0;
-static volatile uint16_t adc_val;
+extern volatile uint16_t adc_val;
 extern volatile uint32_t tiempo_reaccion;
 static volatile uint32_t tiempo_max = 3000;
 
 static uint8_t activaciones[4] = {0};
 static uint32_t puntuacion[4] = {0};
 static uint8_t ganador = 0;
-static volatile uint8_t num_jugadores = 4;
-
+volatile uint8_t num_jugadores;
 
 static Estado_t estado = ESTADO_INICIO;
+
+static uint32_t tiempo_estado = 0;
+static uint8_t primera_entrada = 1;
+static uint8_t jugadores_mostrados = 0xFF;
 
 static void Estado_Inicio(void);
 static void Estado_SelectJugadores(void);
@@ -83,148 +87,97 @@ static void Estado_Inicio(void)
         estado = ESTADO_SELECT_JUGADORES;
     }
 }
+
 static void Estado_SelectJugadores(void)
 {
-	LCD_Clear();
-	    LCD_SetCursor(0,0);
-	    LCD_Print("Selecciona");
-	    LCD_SetCursor(1,0);
-	    LCD_Print("jugadores");
-	    HAL_Delay(2000);
+    if(primera_entrada)
+    {
+        LCD_Clear();
 
-	POT_SeleccionarJugadores();
+        LCD_SetCursor(0,0);
+        LCD_Print("Jugadores:");
 
-    if (Boton_Menu_Pulsado()) {
-        estado = ESTADO_SELECT_DIFICULTAD;
+        tiempo_estado = HAL_GetTick();
+
+        primera_entrada = 0;
     }
 
+    uint16_t adc = POT_LeerADC();
+
+    uint8_t jugadores;
+
+    if(adc <= 1365)
+        jugadores = 2;
+    else if(adc <= 2730)
+        jugadores = 3;
+    else
+        jugadores = 4;
+
+    POT_SetNumJugadores(jugadores);
+
+    if(jugadores != jugadores_mostrados)
+    {
+        LCD_SetCursor(1,0);
+        LCD_Print("   ");
+
+        LCD_SetCursor(1,0);
+        LCD_PrintNumber(jugadores);
+
+        jugadores_mostrados = jugadores;
+    }
+
+    if(Boton_Menu_Pulsado())
+    {
+    	Boton_Menu_Clear();
+    	estado = ESTADO_SELECT_DIFICULTAD;
+        primera_entrada = 1;
+    }
 }
-static void Estado_SelectDificultad(void){
-		LCD_Clear();
-	    LCD_SetCursor(0,0);
-	    LCD_Print("Selecciona");
-	    LCD_SetCursor(1,0);
-	    LCD_Print("dificultad");
-	    HAL_Delay(2000);
-	    POT_SeleccionarDificultad();
-	    if (Boton_Menu_Pulsado()) {
-	            estado = ESTADO_JUEGO;
-	        }
+
+static void Estado_SelectDificultad(void)
+{
+    if(primera_entrada)
+    {
+        LCD_Clear();
+
+        LCD_SetCursor(0,0);
+        LCD_Print("Dificultad:");
+
+        primera_entrada = 0;
+    }
+
+    uint16_t adc = POT_LeerADC();
+
+    POT_ActualizarDificultad(adc);
+
+    LCD_SetCursor(1,0);
+
+    switch(POT_GetDificultad())
+    {
+        case DIFICULTAD_FACIL:
+            LCD_Print("FACIL   ");
+            break;
+
+        case DIFICULTAD_MEDIA:
+            LCD_Print("MEDIA   ");
+            break;
+
+        case DIFICULTAD_DIFICIL:
+            LCD_Print("DIFICIL ");
+            break;
+    }
+
+    if(Boton_Menu_Pulsado())
+    {
+        tiempo_max = POT_GetTiempoMax();
+
+        Boton_Menu_Clear();
+
+        estado = ESTADO_JUEGO;
+        primera_entrada = 1;
+    }
 }
-/*static void Estado_Juego(void){
 
-			LCD_Clear();
-			LCD_SetCursor(0,0);
-			LCD_Print("Partida");
-			LCD_SetCursor(1,0);
-			LCD_Print("en curso...");
-			HAL_Delay(1500);
-
-
-	    	  while(!LOG_RondaTerminada()) {
-	    	  		HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-	    	  		HAL_NVIC_DisableIRQ(EXTI1_IRQn);
-	    	  		HAL_NVIC_DisableIRQ(EXTI2_IRQn);
-	    	  		HAL_NVIC_DisableIRQ(EXTI3_IRQn);
-
-	    	  		BOTONES_Clear();
-
-	    	  		LEDS_AllOff();
-
-	    	  		uint8_t led_actual;
-
-	    	  		do
-	    	  		{
-	    	  		    led_actual = LEDS_Random(num_jugadores);
-
-	    	  		} while(activaciones[led_actual] >= 5);
-
-	    	  		activaciones[led_actual]++;
-
-	    	  		espera = 2000 + (rand() % 2001);   // 2000–4000 ms
-	    	  		HAL_Delay(espera);
-
-	    	  		LEDS_On(led_actual);
-
-	    	  		TIMER_Reset();
-	    	  		TIMER_Start();
-
-	    	  		HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-	    	  		HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	    	  		HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-	    	  		HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-	    	  		int8_t jugador = -1;
-	    	  		while(jugador == -1){
-	    	  			jugador = BOTONES_GetJugador();
-	    	  			contador++;
-	    	  			if(tiempo_reaccion >= tiempo_max)
-	    	  			{
-	    	  			      TIMER_Stop();
-
-	    	  			      jugador = -2;   // timeout
-
-	    	  			      break;
-	    	  			}
-	    	  			if (jugador == led_actual)
-	    	  			{
-	    	  			      TIMER_Stop();
-	    	  				  break;  // respuesta correcta
-	    	  			}
-	    	  			if (jugador != -1)
-	    	  			{
-	    	  				  TIMER_Stop();
-	    	  				  break;  // botón incorrecto (pulsa otro jugador)
-	    	  			}
-	    	  		}
-
-	    	  		// Guardar medida
-
-	    	  		// Comprobar si acertó
-	    	  		if (jugador == led_actual)
-	    	  		{
-	    	  		          // Acierto
-	    	  		          puntuacion[jugador] += tiempo_reaccion;	//sumar al jugador correcto su puntuación
-	    	  		          // Led fijo 2 segundos
-	    	  		          LEDS_AllOff();
-	    	  		          LEDS_On(led_actual);
-	    	  		          HAL_Delay(2000);
-	    	  		}
-	    	  		else if(jugador == -2)
-	    	  		{
-	    	  		          // Tiempo agotado
-	    	  		          puntuacion[led_actual] += tiempo_max; //sumar al jugador que no ha pulsado el tiempo max
-	    	  		          // Parpadeo de error: 10 parpadeos
-	    	  		          for(int k=0; k<10; k++)
-	    	  		          {
-	    	  		            	LEDS_AllOff();
-	    	  		            	HAL_Delay(100);
-
-	    	  		            	LEDS_On(led_actual);
-	    	  		            	HAL_Delay(100);
-	    	  		          }
-	    	  		}
-	    	  		else
-	    	  		{
-	    	  		          // Fallo jugador incorrecto
-	    	  		          puntuacion[jugador] += tiempo_max; //sumar al jugador incorrecto el tiempo max (penalización por pulsar cuando no debes)
-	    	  		          // Parpadeo de error: 5 parpadeos
-	    	  		          for(int k=0; k<5; k++)
-	    	  		          {
-	    	  		            	LEDS_AllOff();
-	    	  		            	HAL_Delay(100);
-
-	    	  		            	LEDS_On(led_actual);
-	    	  		            	HAL_Delay(100);
-	    	  		          }
-	    	  		}
-
-	    	  		HAL_Delay(5000);
-
-	    	  		contador = 0;
-	    	  		ISR = 0;
-	    	  }
-}*/
 static void Estado_Juego(void)
 {
     LCD_Clear();

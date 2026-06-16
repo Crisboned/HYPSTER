@@ -38,7 +38,7 @@ uint8_t LOG_CalcularGanador(uint32_t puntuacion[], uint8_t num_jugadores)
 
     for(uint8_t i = 1; i < num_jugadores; i++)
     {
-        if(puntuacion[i] > max)
+        if(puntuacion[i] < max)
         {
             max = puntuacion[i];
             ganador = i;

@@ -1,0 +1,9 @@
+../Core/Src/potenciometro.c:25:6:POT_Init	1
+../Core/Src/potenciometro.c:29:10:POT_LeerADC	2
+../Core/Src/potenciometro.c:41:6:POT_SetNumJugadores	3
+../Core/Src/potenciometro.c:49:9:POT_GetNumJugadores	1
+../Core/Src/potenciometro.c:54:6:POT_ActualizarDificultad	3
+../Core/Src/potenciometro.c:69:14:POT_GetDificultad	1
+../Core/Src/potenciometro.c:73:10:POT_GetTiempoMax	5
+../Core/Src/potenciometro.c:90:6:POT_SeleccionarJugadores	5
+../Core/Src/potenciometro.c:125:6:POT_SeleccionarDificultad	7

@@ -1,0 +1,5 @@
+../Core/Src/logica.c:11:9:LOG_ElegirJugadorAleatorio	3
+../Core/Src/logica.c:19:9:LOG_EsPulsacionCorrecta	1
+../Core/Src/logica.c:24:9:LOG_RondaTerminada	3
+../Core/Src/logica.c:34:9:LOG_CalcularGanador	3
+../Core/Src/logica.c:51:6:LOG_SumarPunto	1

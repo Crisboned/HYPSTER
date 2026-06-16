@@ -46,3 +46,8 @@ uint8_t Boton_Menu_Pulsado(void)
     }
     return 0;
 }
+
+void Boton_Menu_Clear(void)
+{
+    boton_menu_flag = 0;
+}
