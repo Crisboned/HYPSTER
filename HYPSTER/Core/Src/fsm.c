@@ -83,6 +83,17 @@ static void Estado_Inicio(void)
     LCD_SetCursor(1,0);
     LCD_Print("para empezar");
 
+    for(int i=0; i<4; i++)
+    {
+        activaciones[i] = 0;
+        puntuacion[i] = 0;
+    }
+
+    contador = 0;
+    ISR = 0;
+
+    BOTONES_Clear();
+
     if (Boton_Menu_Pulsado()) {
         estado = ESTADO_SELECT_JUGADORES;
     }
@@ -197,7 +208,18 @@ static void Estado_Juego(void)
     // Bucle principal
     while(!LOG_RondaTerminada(activaciones, num_jugadores))
     {
-        HAL_NVIC_DisableIRQ(EXTI0_IRQn);
+    	if(Boton_Menu_Pulsado())
+    	{
+    	    TIMER_Stop();
+
+    	    LEDS_AllOff();
+
+    	    estado = ESTADO_INICIO;
+
+    	    return;
+    	}
+
+    	HAL_NVIC_DisableIRQ(EXTI0_IRQn);
         HAL_NVIC_DisableIRQ(EXTI1_IRQn);
         HAL_NVIC_DisableIRQ(EXTI2_IRQn);
         HAL_NVIC_DisableIRQ(EXTI3_IRQn);
@@ -229,7 +251,18 @@ static void Estado_Juego(void)
 
         while(jugador == -1)
         {
-            jugador = BOTONES_GetJugador();
+        	if(Boton_Menu_Pulsado())
+        	{
+        	    TIMER_Stop();
+
+        	    LEDS_AllOff();
+
+        	    estado = ESTADO_INICIO;
+
+        	    return;
+        	}
+
+        	jugador = BOTONES_GetJugador();
             contador++;
 
             if(tiempo_reaccion >= tiempo_max)
@@ -291,35 +324,54 @@ static void Estado_Juego(void)
     estado = ESTADO_FIN;
 }
 
-
-
 static void Estado_Fin(void)
 {
-    // Mostrar puntuaciones
-    for(uint8_t i = 0; i < num_jugadores; i++)
+    static uint8_t resultados_mostrados = 0;
+
+    if(resultados_mostrados == 0)
     {
+        // Mostrar puntuaciones
+        for(uint8_t i = 0; i < num_jugadores; i++)
+        {
+            LCD_Clear();
+
+            LCD_SetCursor(0,0);
+            LCD_Print("Jugador ");
+            LCD_PrintNumber(i + 1);
+
+            LCD_SetCursor(1,0);
+            LCD_Print("Pts:");
+            LCD_PrintNumber(puntuacion[i]);
+
+            HAL_Delay(3000);
+        }
+
+        // Mostrar ganador
         LCD_Clear();
+
         LCD_SetCursor(0,0);
-        LCD_Print("Jugador ");
-        LCD_PrintNumber(i + 1);
+        LCD_Print("GANADOR");
 
         LCD_SetCursor(1,0);
-        LCD_Print("Pts: ");
-        LCD_PrintNumber(puntuacion[i]);
+        LCD_Print("Jugador ");
+        LCD_PrintNumber(ganador + 1);
 
-        HAL_Delay(3000);
+        HAL_Delay(5000);
+
+        resultados_mostrados = 1;
     }
 
-    // Mostrar ganador
     LCD_Clear();
     LCD_SetCursor(0,0);
-    LCD_Print("GANADOR");
+    LCD_Print("Pulsa para");
 
     LCD_SetCursor(1,0);
-    LCD_Print("Jugador ");
-    LCD_PrintNumber(ganador + 1);
+    LCD_Print("volver a inicio");
 
-    HAL_Delay(5000);
-
-    estado = ESTADO_INICIO;
+    if(Boton_Menu_Pulsado())
+    {
+        resultados_mostrados = 0;
+        estado = ESTADO_INICIO;
+    }
 }
+

@@ -1,6 +1,6 @@
-../Core/Src/botones.c:14:6:BOTONES_Init	1
-../Core/Src/botones.c:19:6:HAL_GPIO_EXTI_Callback	6
-../Core/Src/botones.c:31:8:BOTONES_GetJugador	1
-../Core/Src/botones.c:36:6:BOTONES_Clear	1
-../Core/Src/botones.c:41:9:Boton_Menu_Pulsado	2
-../Core/Src/botones.c:50:6:Boton_Menu_Clear	1
+../Core/Src/botones.c:15:6:BOTONES_Init	1
+../Core/Src/botones.c:20:6:HAL_GPIO_EXTI_Callback	7
+../Core/Src/botones.c:39:8:BOTONES_GetJugador	1
+../Core/Src/botones.c:44:6:BOTONES_Clear	1
+../Core/Src/botones.c:49:9:Boton_Menu_Pulsado	2
+../Core/Src/botones.c:58:6:Boton_Menu_Clear	1

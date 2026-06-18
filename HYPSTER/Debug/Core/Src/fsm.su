@@ -1,7 +1,7 @@
 ../Core/Src/fsm.c:44:6:FSM_Init	16	static
 ../Core/Src/fsm.c:53:6:FSM_Update	8	static
-../Core/Src/fsm.c:78:13:Estado_Inicio	8	static
-../Core/Src/fsm.c:91:13:Estado_SelectJugadores	16	static
-../Core/Src/fsm.c:137:13:Estado_SelectDificultad	16	static
-../Core/Src/fsm.c:181:13:Estado_Juego	32	static
-../Core/Src/fsm.c:296:13:Estado_Fin	16	static
+../Core/Src/fsm.c:78:13:Estado_Inicio	16	static
+../Core/Src/fsm.c:102:13:Estado_SelectJugadores	16	static
+../Core/Src/fsm.c:148:13:Estado_SelectDificultad	16	static
+../Core/Src/fsm.c:192:13:Estado_Juego	32	static
+../Core/Src/fsm.c:327:13:Estado_Fin	16	static
